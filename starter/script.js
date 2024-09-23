@@ -11,12 +11,53 @@ const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 
+let map;
+let mapEvent;
 
-if(navigator.geolocation)
-navigator.geolocation.getCurrentPosition(function(position){
-       const {latitude}=position.coords;
-       const {longitude}=position.coords;
-    
-},function(){
-   alert('error getting the cordinates')
-})
+if (navigator.geolocation)
+   navigator.geolocation.getCurrentPosition(function (position) {
+      const { latitude } = position.coords;
+      const { longitude } = position.coords;
+
+
+
+      const coords = [latitude, longitude];
+
+
+      map = L.map('map').setView(coords, 13);
+      L.tileLayer('https://tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+
+         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      }).addTo(map);
+
+
+
+
+      //whenever map is clicked coordinates are added to the map with a popup// 
+
+      map.on('click', function (mapE) {
+
+         mapEvent = mapE;
+         form.classList.remove('hidden');
+         inputDistance.focus();
+
+      })
+
+
+   }, function () {
+      alert('error getting the cordinates')
+   })
+
+form.addEventListener('submit', function (e) {
+   e.preventDefault();
+   inputDistance.value = inputDuration.value = inputCadence.value = inputElevation.value = '';
+   //display the marker//
+   const { lat, lng } = mapEvent.latlng;
+   L.marker([lat, lng]).addTo(map).bindPopup(L.popup({
+      maxWidth: 250,
+      minWidth: 100,
+      autoClose: false,
+      closeOnClick: false,
+      className: 'running-popup'
+   })).setPopupContent('Workout').openPopup();
+}) 
